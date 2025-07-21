@@ -2,6 +2,8 @@ package com.artemklymenko.common.utils
 
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 
 sealed class UiText {
 
