@@ -38,24 +38,24 @@ class SearchRepositoryImpl(
 
     override suspend fun getRecipeDetails(id: String): NetworkResult<RecipeDetailsDomain> {
         return try {
-            val response = searchApiService.getRecipeDetails(id)
-                when (val result = response.toNetworkResult()) {
-                    is NetworkResult.Success -> {
-                        val meal = result.data.meals?.firstOrNull()
-                        if (meal != null) {
-                            NetworkResult.Success(meal.toDomain())
-                        } else {
-                            NetworkResult.Error(NetworkError.SERIALIZATION_ERROR)
-                        }
+            val response = searchApiService.getRecipeDetails(recipeId = id)
+            when (val result = response.toNetworkResult()) {
+                is NetworkResult.Success -> {
+                    val meal = result.data.meals?.firstOrNull()
+                    if (meal != null) {
+                        NetworkResult.Success(meal.toDomain())
+                    } else {
+                        NetworkResult.Error(NetworkError.SERIALIZATION_ERROR)
                     }
-                    is NetworkResult.Error -> result
                 }
-            } catch (e: UnknownHostException) {
-                NetworkResult.Error(NetworkError.NO_INTERNET)
-            } catch (e: IOException) {
-                NetworkResult.Error(NetworkError.UNKNOWN)
-            } catch (e: Exception) {
-                NetworkResult.Error(NetworkError.UNKNOWN)
+                is NetworkResult.Error -> result
             }
+        } catch (e: UnknownHostException) {
+            NetworkResult.Error(NetworkError.NO_INTERNET)
+        } catch (e: IOException) {
+            NetworkResult.Error(NetworkError.UNKNOWN)
+        } catch (e: Exception) {
+            NetworkResult.Error(NetworkError.UNKNOWN)
         }
     }
+}
