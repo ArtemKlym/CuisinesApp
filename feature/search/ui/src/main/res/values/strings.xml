@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="show_more">. . . Show More</string>
+    <string name="show_less"> Show Less</string>
+    <string name="favourite_recipes">Favourite Recipes</string>
+    <string name="alphabetical">Alphabetical</string>
+    <string name="less_ingredients">Less Ingredients</string>
+    <string name="reset">Reset</string>
+    <string name="nothing_found">Nothing found</string>
+    <string name="search">Search</string>
+    <string name="lets_find_a_recipe">Let\'s find a recipe</string>
+</resources>
