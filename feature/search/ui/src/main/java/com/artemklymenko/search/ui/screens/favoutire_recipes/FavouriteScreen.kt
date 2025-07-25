@@ -55,7 +55,7 @@ import com.artemklymenko.search.ui.R
 import com.artemklymenko.search.ui.components.ExpandableText
 import kotlinx.coroutines.flow.collectLatest
 
-//TODO: WHEN IT STARTS IT DOESN'T SHOW FAVOURITES RECIPES NEITHER DELETING
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavouriteScreen(

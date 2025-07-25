@@ -14,7 +14,6 @@ import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteEvent
 import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteScreen
 import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteViewModel
 import com.artemklymenko.search.ui.screens.recipe_details.RecipeDetailEvent
-import com.artemklymenko.search.ui.screens.recipe_details.RecipeDetailNavigationEvent
 import com.artemklymenko.search.ui.screens.recipe_details.RecipeDetailScreen
 import com.artemklymenko.search.ui.screens.recipe_details.RecipeDetailViewModel
 import com.artemklymenko.search.ui.screens.recipe_list.RecipeEvent
