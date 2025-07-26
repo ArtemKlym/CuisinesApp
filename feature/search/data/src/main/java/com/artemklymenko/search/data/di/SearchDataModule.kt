@@ -1,6 +1,7 @@
 package com.artemklymenko.search.data.di
 
 import com.artemklymenko.search.core.Constants
+import com.artemklymenko.search.data.local.RecipeDao
 import com.artemklymenko.search.data.remote.SearchApiService
 import com.artemklymenko.search.data.repository.SearchRepositoryImpl
 import com.artemklymenko.search.domain.repository.SearchRepository
@@ -42,7 +43,7 @@ object SearchDataModule {
     }
 
     @Provides
-    fun provideSearchRepository(searchApiService: SearchApiService): SearchRepository {
-        return SearchRepositoryImpl(searchApiService)
+    fun provideSearchRepository(searchApiService: SearchApiService , recipeDao: RecipeDao): SearchRepository {
+        return SearchRepositoryImpl(searchApiService, recipeDao)
     }
 }

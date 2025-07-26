@@ -2,17 +2,20 @@ package com.artemklymenko.search.data.repository
 
 import com.artemklymenko.common.utils.NetworkError
 import com.artemklymenko.common.utils.NetworkResult
+import com.artemklymenko.search.data.local.RecipeDao
 import com.artemklymenko.search.data.mappers.toDomain
 import com.artemklymenko.search.data.mappers.toNetworkResult
 import com.artemklymenko.search.data.remote.SearchApiService
 import com.artemklymenko.search.domain.model.RecipeDetailsDomain
 import com.artemklymenko.search.domain.model.RecipeDomain
 import com.artemklymenko.search.domain.repository.SearchRepository
+import kotlinx.coroutines.flow.Flow
 import java.io.IOException
 import java.net.UnknownHostException
 
 class SearchRepositoryImpl(
-    private val searchApiService: SearchApiService
+    private val searchApiService: SearchApiService,
+    private val recipeDao: RecipeDao
 ) : SearchRepository {
 
     override suspend fun getRecipes(searchQuery: String): NetworkResult<List<RecipeDomain>> {
@@ -57,5 +60,17 @@ class SearchRepositoryImpl(
         } catch (e: Exception) {
             NetworkResult.Error(NetworkError.UNKNOWN)
         }
+    }
+
+    override suspend fun insertRecipe(recipeDomain: RecipeDomain) {
+        recipeDao.insertRecipe(recipeDomain)
+    }
+
+    override suspend fun deleteRecipe(recipeDomain: RecipeDomain) {
+        recipeDao.deleteRecipe(recipeDomain)
+    }
+
+    override fun getAllRecipes(): Flow<List<RecipeDomain>> {
+        return recipeDao.getAllRecipes()
     }
 }
