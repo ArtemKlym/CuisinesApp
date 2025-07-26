@@ -1,4 +1,4 @@
-package com.artemklymenko.search.domain.use_cases
+package com.artemklymenko.search.domain.use_cases.remote
 
 import com.artemklymenko.common.utils.NetworkResult
 import com.artemklymenko.search.domain.model.RecipeDetailsDomain
