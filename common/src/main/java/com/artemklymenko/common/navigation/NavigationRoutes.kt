@@ -5,8 +5,10 @@ sealed class NavigationRoute(val route: String) {
     data object RecipeDetails: NavigationRoute("/recipe_details/{id}") {
         fun sendId(id: String) = "/recipe_details/$id"
     }
-    data object MediaPlayer : NavigationRoute("/player/{video_id}"){
-        fun sendUrl(videoId:String) = "/player/$videoId"
+    data object FavouriteScreen: NavigationRoute("/favourite")
+
+    data object MediaPlayer: NavigationRoute("/player/{video_id}") {
+        fun sendUrl(videoId: String) = "/player/$videoId"
     }
 }
 
