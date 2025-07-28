@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -33,12 +34,20 @@ class SearchRepositoryImplTest {
     private val searchApiService: SearchApiService = mock()
     private val recipeDao: RecipeDao = mock()
 
+    private lateinit var searchRepository: SearchRepositoryImpl
+    private lateinit var searchFakeDaoRepo: SearchRepositoryImpl
+
+    @Before
+    fun setup() {
+        searchRepository = SearchRepositoryImpl(searchApiService, recipeDao)
+        searchFakeDaoRepo = SearchRepositoryImpl(searchApiService, FakeRecipeDao())
+    }
+
     @Test
     fun `get a valid recipe response`() = runTest {
         `when`(searchApiService.getRecipes(QUERY_STRING))
             .thenReturn(Response.success(200, getRecipeResponse()))
 
-        val searchRepository = SearchRepositoryImpl(searchApiService, recipeDao)
         val response = searchRepository.getRecipes(QUERY_STRING)
         assertEquals(NetworkResult.Success(getRecipeResponse().meals?.toDomain()), response)
     }
@@ -48,8 +57,7 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipeDetails(ID_STRING))
             .thenReturn(Response.success(200, getRecipeDetails()))
 
-        val searchRepositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = searchRepositoryImpl.getRecipeDetails(ID_STRING)
+        val response = searchRepository.getRecipeDetails(ID_STRING)
         val expected = NetworkResult.Success(getRecipeDetails().meals?.first()?.toDomain())
         assertEquals(expected, response)
     }
@@ -59,8 +67,7 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipeDetails(ID_STRING))
             .thenReturn(Response.success(200, RecipeDetailsResponse(meals = emptyList())))
 
-        val searchRepositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = searchRepositoryImpl.getRecipeDetails(ID_STRING)
+        val response = searchRepository.getRecipeDetails(ID_STRING)
         val errorMessage = NetworkResult.Error(NetworkError.SERIALIZATION_ERROR)
         assertEquals(errorMessage, response)
     }
@@ -70,8 +77,7 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipes(QUERY_STRING))
             .thenReturn(Response.success(200, getRecipeResponseWithNullMeals()))
 
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = repositoryImpl.getRecipes(QUERY_STRING)
+        val response = searchRepository.getRecipes(QUERY_STRING)
         val errorMessage = NetworkResult.Error(NetworkError.SERIALIZATION_ERROR)
         assertEquals(errorMessage, response)
     }
@@ -84,8 +90,7 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipes(QUERY_STRING))
             .thenReturn(Response.error(408, errorBody))
 
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = repositoryImpl.getRecipes(QUERY_STRING)
+        val response = searchRepository.getRecipes(QUERY_STRING)
         val errorMessage = NetworkResult.Error(NetworkError.REQUEST_TIMEOUT)
         assertEquals(errorMessage, response)
     }
@@ -98,8 +103,7 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipes(QUERY_STRING))
             .thenReturn(Response.error(429, errorBody))
 
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = repositoryImpl.getRecipes(QUERY_STRING)
+        val response = searchRepository.getRecipes(QUERY_STRING)
         val errorMessage = NetworkResult.Error(NetworkError.TOO_MANY_REQUESTS)
         assertEquals(errorMessage, response)
     }
@@ -112,55 +116,50 @@ class SearchRepositoryImplTest {
         `when`(searchApiService.getRecipes(QUERY_STRING))
             .thenReturn(Response.error(500, errorBody))
 
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
-        val response = repositoryImpl.getRecipes(QUERY_STRING)
+        val response = searchRepository.getRecipes(QUERY_STRING)
         val errorMessage = NetworkResult.Error(NetworkError.SERVER_ERROR)
         assertEquals(errorMessage, response)
     }
 
     @Test
     fun `test no internet connection returns NO_INTERNET error`() = runTest {
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
         val exception = UnknownHostException()
 
         Mockito.doAnswer {
             throw exception
         }.`when`(searchApiService).getRecipes(QUERY_STRING)
 
-        val result = repositoryImpl.getRecipes(QUERY_STRING)
+        val result = searchRepository.getRecipes(QUERY_STRING)
         assertEquals(NetworkResult.Error(NetworkError.NO_INTERNET), result)
     }
 
     @Test
     fun `test io exception returns UNKNOWN error`() = runTest {
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, recipeDao)
         val ioException = IOException()
 
         Mockito.doAnswer {
             throw ioException
         }.`when`(searchApiService).getRecipes(QUERY_STRING)
 
-        val result = repositoryImpl.getRecipes(QUERY_STRING)
+        val result = searchRepository.getRecipes(QUERY_STRING)
         assertEquals(NetworkResult.Error(NetworkError.UNKNOWN), result)
     }
 
     @Test
     fun `test insert a recipe to database`() = runTest {
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, FakeRecipeDao())
         val recipe = getRecipeResponse().meals?.toDomain()?.first()
-        repositoryImpl.insertRecipe(recipe!!)
-        assertEquals(recipe, repositoryImpl.getAllRecipes().first().first())
+        searchFakeDaoRepo.insertRecipe(recipe!!)
+        assertEquals(recipe, searchFakeDaoRepo.getAllRecipes().first().first())
     }
 
     @Test
     fun `test remove a recipe from database`() = runTest {
-        val repositoryImpl = SearchRepositoryImpl(searchApiService, FakeRecipeDao())
         val recipe = getRecipeResponse().meals?.toDomain()?.first()
-        repositoryImpl.insertRecipe(recipe!!)
-        val list = repositoryImpl.getAllRecipes().first().first()
+        searchFakeDaoRepo.insertRecipe(recipe!!)
+        val list = searchFakeDaoRepo.getAllRecipes().first().first()
         assertEquals(recipe, list)
-        repositoryImpl.deleteRecipe(recipe)
-        assertEquals(emptyList<RecipeDomain>(), repositoryImpl.getAllRecipes().last())
+        searchFakeDaoRepo.deleteRecipe(recipe)
+        assertEquals(emptyList<RecipeDomain>(), searchFakeDaoRepo.getAllRecipes().last())
     }
 }
 
