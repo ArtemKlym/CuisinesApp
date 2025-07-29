@@ -42,9 +42,6 @@ class FavouriteViewModel @Inject constructor(
             FavouriteEvent.AlphabeticalSort -> alphabeticalSort()
             FavouriteEvent.LessIngredientSort -> lessIngredientsSort()
             FavouriteEvent.ResetSort -> resetSort()
-            is FavouriteEvent.ShowDetails -> viewModelScope.launch {
-                _navigation.send(FavouriteNavigationEvent.GoToRecipeDetailScreen(event.id))
-            }
             is FavouriteEvent.DeleteRecipe -> deleteRecipe(event.recipeDomain)
             is FavouriteEvent.GoToDetails -> viewModelScope.launch {
                 _navigation.send(FavouriteNavigationEvent.GoToRecipeDetailScreen(event.id))
