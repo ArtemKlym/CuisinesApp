@@ -65,4 +65,7 @@ dependencies {
     implementation(libs.navigation.compose)
 
     implementation(libs.coil.compose)
+
+    testImplementation(libs.test.coroutines)
+    testImplementation(libs.mockito)
 }
