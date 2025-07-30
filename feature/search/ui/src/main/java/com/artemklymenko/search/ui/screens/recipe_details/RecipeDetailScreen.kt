@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -48,6 +49,12 @@ import com.artemklymenko.search.domain.model.RecipeDetailsDomain
 import com.artemklymenko.search.ui.R
 import com.artemklymenko.search.ui.components.ExpandableText
 import kotlinx.coroutines.flow.collectLatest
+
+object RecipeDetailScreenTestTag {
+    const val INSERT = "insert"
+    const val DELETE = "delete"
+    const val ARROW_BACK = "arrow_back"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,6 +101,7 @@ fun RecipeDetailScreen(
                         modifier = Modifier.clickable {
                             onNavigationBackClick()
                         }
+                            .testTag(RecipeDetailScreenTestTag.ARROW_BACK)
                     )
                 },
                 actions = {
@@ -102,7 +110,8 @@ fun RecipeDetailScreen(
                             uiState.value.data?.let {
                                 onFavouriteClick(it)
                             }
-                        }
+                        },
+                        modifier = Modifier.testTag(RecipeDetailScreenTestTag.INSERT)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
@@ -114,7 +123,8 @@ fun RecipeDetailScreen(
                             uiState.value.data?.let {
                                 onDelete(it)
                             }
-                        }
+                        },
+                        modifier = Modifier.testTag(RecipeDetailScreenTestTag.DELETE)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
