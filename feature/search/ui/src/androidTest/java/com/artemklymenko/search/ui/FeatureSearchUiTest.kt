@@ -58,6 +58,7 @@ class FeatureSearchUiTest {
 
     companion object {
         const val QUERY_STRING = "chicken"
+        const val NOTHING_FOUND = "Nothing found"
     }
 
     @Before
@@ -168,7 +169,8 @@ class FeatureSearchUiTest {
             onNodeWithTag(RecipeListScreenTag.SEARCH).performClick()
             onNodeWithTag(RecipeListScreenTag.SEARCH).performTextInput(QUERY_STRING)
             waitUntil(timeoutMillis = 5000) {
-                onAllNodesWithText(NetworkError.NO_INTERNET.toString()).fetchSemanticsNodes().isNotEmpty()
+                onAllNodesWithText(NetworkError.NO_INTERNET.toString()).fetchSemanticsNodes()
+                    .isNotEmpty()
             }
             onNodeWithText(NetworkError.NO_INTERNET.toString()).assertIsDisplayed()
         }
@@ -240,7 +242,129 @@ class FeatureSearchUiTest {
             onNodeWithText(getRecipeResponse().first().strMeal).assertIsDisplayed()
 
             onNodeWithTag(FavouriteScreenTestTag.DELETE).performClick()
-            onNodeWithText("Nothing found").assertIsDisplayed()
+            onNodeWithText(NOTHING_FOUND).assertIsDisplayed()
         }
     }
+
+    @Test
+    fun test_sort_alphabetically_after_insertion() {
+        initSuccessUseCases()
+        testingEnvironment()
+
+        with(composeRule) {
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performTextInput(QUERY_STRING)
+
+            waitUntil(timeoutMillis = 5000) {
+                onAllNodesWithTag(RecipeListScreenTag.LAZY_COL).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            onNodeWithTag(getRecipeResponse()[1].strMeal + 1).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(getRecipeResponse()[0].strMeal + 0).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.FLOATING_ACTION_BTN).performClick()
+
+            waitForIdle()
+
+            onNodeWithTag(FavouriteScreenTestTag.DROP_DOWN).performClick()
+            onNodeWithTag(FavouriteScreenTestTag.ALPHABETICAL).performClick()
+
+            val sortedRecipes = getRecipeResponse().sortedBy { it.strMeal }
+
+            onNodeWithTag("FavouriteItem_${sortedRecipes[0].idMeal + 1}")
+                .assertIsDisplayed()
+
+        }
+    }
+
+    @Test
+    fun test_sort_less_ingredients_after_insertion() {
+        initSuccessUseCases()
+        testingEnvironment()
+
+        with(composeRule) {
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performTextInput(QUERY_STRING)
+
+            waitUntil(timeoutMillis = 5000) {
+                onAllNodesWithTag(RecipeListScreenTag.LAZY_COL).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            onNodeWithTag(getRecipeResponse()[0].strMeal + 0).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(getRecipeResponse()[1].strMeal + 1).performClick()
+
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.FLOATING_ACTION_BTN).performClick()
+
+            waitForIdle()
+
+            onNodeWithTag(FavouriteScreenTestTag.DROP_DOWN).performClick()
+            onNodeWithTag(FavouriteScreenTestTag.LESS_INGREDIENT).performClick()
+
+            val sortedRecipes = getRecipeResponse().sortedBy { it.strInstructions.length }
+
+           println("FavouriteItem_${sortedRecipes[1].idMeal + 0}")
+            onNodeWithTag("FavouriteItem_${sortedRecipes[1].idMeal + 0}")
+                .assertIsDisplayed()
+
+        }
+    }
+
+    @Test
+    fun test_reset_after_alphabetical_sort() {
+        initSuccessUseCases()
+        testingEnvironment()
+
+        with(composeRule) {
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.SEARCH).performTextInput(QUERY_STRING)
+
+            waitUntil(timeoutMillis = 5000) {
+                onAllNodesWithTag(RecipeListScreenTag.LAZY_COL).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            onNodeWithTag(getRecipeResponse()[1].strMeal + 1).performClick()
+
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(getRecipeResponse()[0].strMeal + 0).performClick()
+
+            onNodeWithTag(RecipeDetailScreenTestTag.INSERT).performClick()
+            onNodeWithTag(RecipeDetailScreenTestTag.ARROW_BACK).performClick()
+
+            onNodeWithTag(RecipeListScreenTag.FLOATING_ACTION_BTN).performClick()
+
+            waitForIdle()
+
+            onNodeWithTag(FavouriteScreenTestTag.DROP_DOWN).performClick()
+            onNodeWithTag(FavouriteScreenTestTag.ALPHABETICAL).performClick()
+            val sortedRecipes = getRecipeResponse().sortedBy { it.strMeal }
+
+            onNodeWithTag("FavouriteItem_${sortedRecipes[0].idMeal + 1}")
+                .assertIsDisplayed()
+
+            onNodeWithTag(FavouriteScreenTestTag.RESET).performClick()
+
+            onNodeWithTag("FavouriteItem_${getRecipeResponse()[0].idMeal + 0}")
+                .assertIsDisplayed()
+
+        }
+    }
+
+
+
 }

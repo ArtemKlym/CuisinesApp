@@ -269,7 +269,7 @@ fun FavouriteRecipeContent(
 ) {
     Card(
         modifier = Modifier
-            .testTag(recipe.strMeal.plus(index))
+            .testTag("FavouriteItem_${recipe.idMeal + index}")
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .clickable { onDetailClick(recipe.idMeal) },
         shape = RoundedCornerShape(16.dp)
