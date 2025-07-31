@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -55,6 +56,14 @@ import com.artemklymenko.search.ui.R
 import com.artemklymenko.search.ui.components.ExpandableText
 import kotlinx.coroutines.flow.collectLatest
 
+object FavouriteScreenTestTag {
+    const val LAZY_COL = "lazy_col"
+    const val DROP_DOWN = "drop_down"
+    const val ALPHABETICAL = "alphabetical"
+    const val LESS_INGREDIENT = "less_ingredient"
+    const val RESET = "reset"
+    const val DELETE = "delete"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +103,9 @@ fun FavouriteScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = {
+                    IconButton(
+                        modifier = Modifier.testTag(FavouriteScreenTestTag.DROP_DOWN),
+                        onClick = {
                         showDropDown.value = showDropDown.value.not()
                     }) {
                         Icon(
@@ -109,6 +120,7 @@ fun FavouriteScreen(
                                 }
                             ) {
                                 DropdownMenuItem(
+                                    modifier = Modifier.testTag(FavouriteScreenTestTag.ALPHABETICAL),
                                     text = {
                                         Text(
                                             text = stringResource(R.string.alphabetical)
@@ -130,6 +142,7 @@ fun FavouriteScreen(
                                         )
                                     })
                                 DropdownMenuItem(
+                                    modifier = Modifier.testTag(FavouriteScreenTestTag.LESS_INGREDIENT),
                                     text = {
                                         Text(
                                             text = stringResource(R.string.less_ingredients)
@@ -151,6 +164,7 @@ fun FavouriteScreen(
                                         )
                                     })
                                 DropdownMenuItem(
+                                    modifier = Modifier.testTag(FavouriteScreenTestTag.RESET),
                                     text = {
                                         Text(
                                             text = stringResource(R.string.reset)
@@ -233,10 +247,12 @@ private fun FavouriteScreenContent(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize()
+            .testTag(FavouriteScreenTestTag.LAZY_COL)
     ) {
-        items(favouriteRecipes) { recipe ->
+        itemsIndexed(favouriteRecipes) { index, recipe ->
             FavouriteRecipeContent(
                 recipe = recipe,
+                index = index,
                 onDetailClick = onDetailClick,
                 onDeleteClick = onDeleteClick
             )
@@ -247,11 +263,13 @@ private fun FavouriteScreenContent(
 @Composable
 fun FavouriteRecipeContent(
     recipe: RecipeDomain,
+    index: Int,
     onDetailClick: (String) -> Unit,
     onDeleteClick: (RecipeDomain) -> Unit
 ) {
     Card(
         modifier = Modifier
+            .testTag("FavouriteItem_${recipe.idMeal + index}")
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .clickable { onDetailClick(recipe.idMeal) },
         shape = RoundedCornerShape(16.dp)
@@ -274,6 +292,7 @@ fun FavouriteRecipeContent(
                         color = Color.White,
                         shape = CircleShape
                     )
+                    .testTag(FavouriteScreenTestTag.DELETE)
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,

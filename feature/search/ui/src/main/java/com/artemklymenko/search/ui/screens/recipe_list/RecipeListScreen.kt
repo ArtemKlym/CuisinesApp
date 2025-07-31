@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -55,6 +56,12 @@ import com.artemklymenko.search.domain.model.RecipeDomain
 import com.artemklymenko.search.ui.R
 import com.artemklymenko.search.ui.components.ExpandableText
 import kotlinx.coroutines.flow.collectLatest
+
+object RecipeListScreenTag {
+    const val SEARCH = "search"
+    const val LAZY_COL = "lazy_col"
+    const val FLOATING_ACTION_BTN = "fab"
+}
 
 @Composable
 fun RecipeListScreen(
@@ -75,6 +82,7 @@ fun RecipeListScreen(
                 is RecipeNavigationEvent.GoToRecipeDetails -> {
                     navHostController.navigate(NavigationRoute.RecipeDetails.sendId(it.id))
                 }
+
                 is RecipeNavigationEvent.GoToFavoriteScreen -> {
                     navHostController.navigate((NavigationRoute.FavouriteScreen.route))
                 }
@@ -90,9 +98,11 @@ fun RecipeListScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.onEvent(RecipeEvent.GoToFavouriteScreen)
-            }) {
+            FloatingActionButton(
+                modifier = Modifier.testTag(RecipeListScreenTag.FLOATING_ACTION_BTN),
+                onClick = {
+                    viewModel.onEvent(RecipeEvent.GoToFavouriteScreen)
+                }) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null
@@ -124,7 +134,9 @@ fun RecipeListScreen(
                         contentDescription = stringResource(R.string.search)
                     )
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(RecipeListScreenTag.SEARCH)
             )
         }
     ) {
@@ -138,7 +150,7 @@ fun RecipeListScreen(
                 CircularProgressIndicator()
             }
         }
-        if(query.isBlank()) {
+        if (query.isBlank()) {
             Box(
                 modifier = Modifier
                     .padding(it)
@@ -168,10 +180,12 @@ fun RecipeListScreen(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
+                    .testTag(RecipeListScreenTag.LAZY_COL)
             ) {
-                items(recipeList) { recipe ->
+                itemsIndexed(recipeList) { item, recipe ->
                     RecipeContent(
                         recipe = recipe,
+                        item = item,
                         onDetailClick = onDetailClick
                     )
                 }
@@ -183,12 +197,14 @@ fun RecipeListScreen(
 @Composable
 private fun RecipeContent(
     recipe: RecipeDomain,
+    item: Int,
     onDetailClick: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 8.dp)
-            .clickable { onDetailClick(recipe.idMeal) },
+            .clickable { onDetailClick(recipe.idMeal) }
+            .testTag(recipe.strMeal.plus(item)),
         shape = RoundedCornerShape(16.dp)
     ) {
         AsyncImage(

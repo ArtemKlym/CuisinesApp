@@ -56,6 +56,8 @@ dependencies {
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.espresso)
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.dagger.hilt)
