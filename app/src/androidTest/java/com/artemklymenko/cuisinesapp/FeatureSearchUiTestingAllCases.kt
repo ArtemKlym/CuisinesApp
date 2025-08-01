@@ -1,10 +1,11 @@
-package com.artemklymenko.search.ui
+package com.artemklymenko.cuisinesapp
 
+import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildAt
@@ -17,13 +18,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.artemklymenko.common.navigation.NavigationRoute
 import com.artemklymenko.common.utils.NetworkError
+import com.artemklymenko.cuisinesapp.di.DatabaseModule
+import com.artemklymenko.cuisinesapp.repository.FakeFailureRepositoryImpl
+import com.artemklymenko.cuisinesapp.repository.FakeSuccessRepositoryImpl
+import com.artemklymenko.cuisinesapp.utils.getRecipeResponse
+import com.artemklymenko.search.data.di.SearchDataModule
 import com.artemklymenko.search.domain.use_cases.local.DeleteRecipeUseCase
 import com.artemklymenko.search.domain.use_cases.local.GetAllRecipesFromLocalDbUseCase
 import com.artemklymenko.search.domain.use_cases.local.InsertRecipeUseCase
 import com.artemklymenko.search.domain.use_cases.remote.GetAllRecipeUseCase
 import com.artemklymenko.search.domain.use_cases.remote.GetRecipeDetailUseCase
-import com.artemklymenko.search.ui.repository.FakeFailureRepositoryImpl
-import com.artemklymenko.search.ui.repository.FakeSuccessRepositoryImpl
 import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteEvent
 import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteScreen
 import com.artemklymenko.search.ui.screens.favoutire_recipes.FavouriteScreenTestTag
@@ -36,16 +40,23 @@ import com.artemklymenko.search.ui.screens.recipe_list.RecipeEvent
 import com.artemklymenko.search.ui.screens.recipe_list.RecipeListScreen
 import com.artemklymenko.search.ui.screens.recipe_list.RecipeListScreenTag
 import com.artemklymenko.search.ui.screens.recipe_list.RecipeListViewModel
-import com.artemklymenko.search.ui.utils.getRecipeResponse
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class FeatureSearchUiTest {
+@HiltAndroidTest
+@UninstallModules(SearchDataModule::class, DatabaseModule::class)
+class FeatureSearchUiTestingAllCases {
 
-    @get:Rule
-    val composeRule = createComposeRule()
+    @get:Rule(order = 1)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 2)
+    val composeRule = createAndroidComposeRule<MainActivity>()
 
     private lateinit var getAllRecipeUseCase: GetAllRecipeUseCase
     private lateinit var getAllRecipesFromLocalDbUseCase: GetAllRecipesFromLocalDbUseCase
@@ -63,6 +74,7 @@ class FeatureSearchUiTest {
 
     @Before
     fun setup() {
+        hiltRule.inject()
         fakeSuccessRepository = FakeSuccessRepositoryImpl()
         fakeFailureRepository = FakeFailureRepositoryImpl()
     }
@@ -96,7 +108,7 @@ class FeatureSearchUiTest {
         val favouriteViewModel =
             FavouriteViewModel(getAllRecipesFromLocalDbUseCase, deleteRecipeUseCase)
 
-        composeRule.setContent {
+        composeRule.activity.setContent {
             val navHostController = rememberNavController()
             NavHost(
                 navController = navHostController,
@@ -315,7 +327,7 @@ class FeatureSearchUiTest {
 
             val sortedRecipes = getRecipeResponse().sortedBy { it.strInstructions.length }
 
-           println("FavouriteItem_${sortedRecipes[1].idMeal + 0}")
+            println("FavouriteItem_${sortedRecipes[1].idMeal + 0}")
             onNodeWithTag("FavouriteItem_${sortedRecipes[1].idMeal + 0}")
                 .assertIsDisplayed()
 
