@@ -364,7 +364,4 @@ class FeatureSearchUiTest {
 
         }
     }
-
-
-
 }
